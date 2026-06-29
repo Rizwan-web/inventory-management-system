@@ -17,42 +17,92 @@ class PurchaseController extends Controller
         return view('purchase.index', compact('supplier'));
     }
     // visit "codeastro" for more projects!
-    public function data()
-    {
-        $purchase = Purchase::orderBy('id_purchase', 'desc')->get();
+    // public function data()
+    // {
+    //     $purchase = Purchase::orderBy('id_purchase', 'desc')->get();
 
-        return datatables()
-            ->of($purchase)
-            ->addIndexColumn()
-            ->addColumn('total_item', function ($purchase) {
-                return format_uang($purchase->total_item);
-            })
-            ->addColumn('total_price', function ($purchase) {
-                return '$ '. format_uang($purchase->total_price);
-            })
-            ->addColumn('pay', function ($purchase) {
-                return '$ '. format_uang($purchase->pay);
-            })
-            ->addColumn('tanggal', function ($purchase) {
-                return tanggal_indonesia($purchase->created_at, false);
-            })
-            ->addColumn('supplier', function ($purchase) {
-                return $purchase->supplier->name;
-            })
-            ->editColumn('discount', function ($purchase) {
-                return $purchase->discount . '%';
-            })
-            ->addColumn('aksi', function ($purchase) {
-                return '
-                <div class="btn-group">
-                    <button onclick="showDetail(`'. route('purchase.show', $purchase->id_purchase) .'`)" class="btn btn-xs btn-primary btn-flat"><i class="fa fa-eye"></i></button>
-                    <button onclick="deleteData(`'. route('purchase.destroy', $purchase->id_purchase) .'`)" class="btn btn-xs btn-danger btn-flat"><i class="fa fa-trash"></i></button>
-                </div>
-                ';
-            })
-            ->rawColumns(['aksi'])
-            ->make(true);
-    }
+    //     return datatables()
+    //         ->of($purchase)
+    //         ->addIndexColumn()
+    //         ->addColumn('total_item', function ($purchase) {
+    //             return format_uang($purchase->total_item);
+    //         })
+    //         ->addColumn('total_price', function ($purchase) {
+    //             return '$ '. format_uang($purchase->total_price);
+    //         })
+    //         ->addColumn('pay', function ($purchase) {
+    //             return '$ '. format_uang($purchase->pay);
+    //         })
+    //         ->addColumn('tanggal', function ($purchase) {
+    //             return tanggal_indonesia($purchase->created_at, false);
+    //         })
+    //         ->addColumn('supplier', function ($purchase) {
+    //             return $purchase->supplier->name;
+    //         })
+    //         ->editColumn('discount', function ($purchase) {
+    //             return $purchase->discount . '%';
+    //         })
+    //         ->addColumn('aksi', function ($purchase) {
+    //             return '
+    //             <div class="btn-group">
+    //                 <button onclick="showDetail(`'. route('purchase.show', $purchase->id_purchase) .'`)" class="btn btn-xs btn-primary btn-flat"><i class="fa fa-eye"></i></button>
+    //                 <button onclick="deleteData(`'. route('purchase.destroy', $purchase->id_purchase) .'`)" class="btn btn-xs btn-danger btn-flat"><i class="fa fa-trash"></i></button>
+    //             </div>
+    //             ';
+    //         })
+    //         ->rawColumns(['aksi'])
+    //         ->make(true);
+    // }
+
+    public function data()
+{
+    $purchase = Purchase::with('supplier')
+        ->orderBy('id_purchase', 'desc')
+        ->get();
+
+    return datatables()
+        ->of($purchase)
+        ->addIndexColumn()
+
+        ->addColumn('total_item', function ($purchase) {
+            return format_uang($purchase->total_item);
+        })
+
+        ->addColumn('total_price', function ($purchase) {
+            return '$ ' . format_uang($purchase->total_price);
+        })
+
+        ->addColumn('pay', function ($purchase) {
+            return '$ ' . format_uang($purchase->pay);
+        })
+
+        ->addColumn('tanggal', function ($purchase) {
+            return tanggal_indonesia($purchase->created_at, false);
+        })
+
+        ->addColumn('supplier', function ($purchase) {
+            return $purchase->supplier->name ?? 'No Supplier';
+        })
+
+        ->editColumn('discount', function ($purchase) {
+            return $purchase->discount . '%';
+        })
+
+        ->addColumn('aksi', function ($purchase) {
+            return '
+            <div class="btn-group">
+                <button onclick="showDetail(`' . route('purchase.show', $purchase->id_purchase) . '`)" class="btn btn-xs btn-primary btn-flat">
+                    <i class="fa fa-eye"></i>
+                </button>
+                <button onclick="deleteData(`' . route('purchase.destroy', $purchase->id_purchase) . '`)" class="btn btn-xs btn-danger btn-flat">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </div>';
+        })
+
+        ->rawColumns(['aksi'])
+        ->make(true);
+}
 
     public function create($id)
     {
