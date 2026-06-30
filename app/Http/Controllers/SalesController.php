@@ -349,10 +349,14 @@ class SalesController extends Controller
                 ->update(['invoice_number' => $nextInvoiceNumber]);
         }
 
-        // Store the invoice number and the DC numbers involved
+        // Store the invoice number, sales IDs, and optional fare
+        $involvedSalesIds = $sales->pluck('id_sales')->values()->toArray();
         $involvedDc = $sales->pluck('dc_number')->unique()->values()->toArray();
+        $fare = (float) $request->input('fare_amount', 0);
         session(['generated_invoice_number' => $nextInvoiceNumber]);
+        session(['generated_sales_ids' => $involvedSalesIds]);
         session(['generated_dc_numbers' => $involvedDc]);
+        session(['generated_fare' => $fare]);
 
         return redirect()->back()->with('success', 'Invoice generated successfully with number: INV-' . str_pad($nextInvoiceNumber, 4, '0', STR_PAD_LEFT));
     }
@@ -360,17 +364,23 @@ class SalesController extends Controller
     public function downloadGeneratedInvoice()
     {
         $invoiceNumber = session('generated_invoice_number');
+        $salesIds = session('generated_sales_ids');
         $dcNumbers = session('generated_dc_numbers');
+        $fare = (float) session('generated_fare', 0);
 
-        if (!$invoiceNumber || !$dcNumbers) {
+        if (!$invoiceNumber || (empty($salesIds) && empty($dcNumbers))) {
             abort(404);
         }
 
         $setting = Setting::first();
-        
-        // Get all sales with the specified DC numbers
-        $sales = Sales::whereIn('dc_number', $dcNumbers)->get();
-        
+
+        // Prefer lookup by sales IDs (works even when dc_number is null)
+        if (!empty($salesIds)) {
+            $sales = Sales::whereIn('id_sales', $salesIds)->get();
+        } else {
+            $sales = Sales::whereIn('dc_number', array_filter($dcNumbers))->get();
+        }
+
         if ($sales->isEmpty()) {
             abort(404);
         }
@@ -386,8 +396,9 @@ class SalesController extends Controller
             'sales' => $sales,
             'detail' => $detail,
             'invoiceNumber' => $invoiceNumber,
+            'fare' => $fare,
         ])->setPaper('A4', 'portrait');
-        
+
         return $pdf->stream('Invoice-'. str_pad($invoiceNumber, 4, '0', STR_PAD_LEFT) .'.pdf');
     }
 }

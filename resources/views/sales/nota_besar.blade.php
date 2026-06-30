@@ -395,8 +395,22 @@
             <div class="total-section">
                 <table class="total-table">
                     @php
-                        $grandTotal = (!empty($isCollection) && $isCollection) ? collect($sales)->sum('total_price') : ($sales->total_price ?? 0);
+                        $subTotal = (!empty($isCollection) && $isCollection) ? collect($sales)->sum('total_price') : ($sales->total_price ?? 0);
+                        $fare = $fare ?? 0;
+                        $grandTotal = $subTotal + $fare;
                     @endphp
+                    @if($fare > 0)
+                    <tr>
+                        <td class="total-spacer" style="border: none;"></td>
+                        <td class="total-label">Sub Total</td>
+                        <td class="total-amount">{{ format_uang($subTotal) }}</td>
+                    </tr>
+                    <tr>
+                        <td class="total-spacer" style="border: none;"></td>
+                        <td class="total-label">Delivery Charge</td>
+                        <td class="total-amount">{{ format_uang($fare) }}</td>
+                    </tr>
+                    @endif
                     <tr>
                         <td class="total-spacer" style="border: none;"></td>
                         <td class="total-row total-label"><strong>Grand Total</strong></td>

@@ -106,6 +106,17 @@
                             </div>
                         </div>
                     </div>
+                    <div class="modal-body pt-0">
+                        <div class="form-group mb-0">
+                            <label for="fare_amount"><strong>Delivery / Shipping Charge (optional):</strong></label>
+                            <div class="input-group" style="max-width: 260px;">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Rs.</span>
+                                </div>
+                                <input type="number" id="fare_amount" name="fare_amount" class="form-control" min="0" step="0.01" placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary" id="generateInvoiceBtn" disabled>
